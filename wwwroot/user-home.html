@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дом пользователя | Home of Memories</title>
+    <link rel="stylesheet" href="assets/style/style.css">
+</head>
+<body>
+
+    <!-- ШАПКА -->
+    <header></header>
+
+    <main class="user-home-page">
+
+        <!-- ИНФОРМАЦИЯ О ДОМЕ -->
+        <div class="profile-card">
+            <div class="profile-top">
+                <div class="ava-and-shi">
+                    <div class="profile-avatar">
+                        <img src="assets/image/icon/interact/no-pfp.svg" alt="Фото профиля">
+                    </div>
+                    <div class="profile-name-wrapper">
+                        <h1 class="profile-name" id="userName">Загрузка...</h1>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="statMemories">0</span>
+                        <span class="stat-label">воспоминаний</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">гостей</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">любимые дома</span>
+                    </div>
+                </div>
+                <button class="follow-btn">🏠 Стать постоянным гостем</button>
+            </div>
+            <div class="profile-bottom">
+                <p class="profile-bio" id="userBio">
+                    Загрузка описания...
+                </p>
+            </div>
+        </div>
+
+        <div class="container">
+
+            <!-- ПОЛКИ ВОСПОМИНАНИЙ -->
+            <div class="shelves-section" style="margin-top: 40px;">
+                <h2 class="shelves-title">Полки воспоминаний</h2>
+
+                <div id="userMemoriesContainer" class="shelf-items" style="background-color: var(--secondary);">
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ПОДВАЛ -->
+    <footer></footer>
+
+    <script src="assets/js/header.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <script>
+        renderHeader();
+        renderFooter();
+    </script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/translate.js"></script>
+
+    <!-- получение данных о пользователе, их вывод -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // получение айди пользователя из адресной строки
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+
+            if (!userId) {
+                alert("Пользователь не выбран!");
+                window.location.href = 'catalog.html';
+                return;
+            }
+
+            try {
+                // получение данных о пользователе
+                const userRes = await fetch(`/api/memories/user/${userId}/info`);
+                if (!userRes.ok) throw new Error("Пользователь не найден");
+                const userInfo = await userRes.json();
+
+                document.getElementById('userName').textContent = userInfo.login;
+                document.getElementById('userBio').textContent = userInfo.bio || "Пользователь пока ничего не рассказал о себе.";
+
+                const memoriesRes = await fetch(`/api/memories/user/${userId}`);
+                const memories = await memoriesRes.json();
+
+                // обновление счетчика
+                document.getElementById('statMemories').textContent = memories.length;
+
+                const container = document.getElementById('userMemoriesContainer');
+
+                if (memories.length === 0) {
+                    container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">У этого пользователя пока нет опубликованных воспоминаний.</p>';
+                    return;
+                }
+
+                // вывод карточек
+                container.innerHTML = memories.map(m => {
+                    const imgUrl = m.cover ? `/${m.cover}` : 'assets/image/picture/phone.jpg';
+                    let dateString = 'Дата не указана';
+                    if (m.createdAt) {
+                        const date = new Date(m.createdAt);
+                        dateString = `Опубликовано: ${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                    }
+
+                    return `
+                        <a href="item.html?id=${m.id}" class="shelf-item">
+                            <div class="shelf-item-image" style="--bg: url('${imgUrl}')"></div>
+                            <div class="shelf-item-content">
+                                <h4 class="shelf-item-title">${m.title}</h4>
+                                <p class="shelf-item-desc marg">${dateString}</p>
+                                <p class="shelf-item-desc">${m.story}</p>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error("Ошибка загрузки:", error);
+                document.getElementById('userName').textContent = "Пользователь не найден";
+            }
+        });
+    </script>
+</body>
+</html>

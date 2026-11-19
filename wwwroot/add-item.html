@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить воспоминание</title>
+    <link rel="stylesheet" href="assets/style/style.css">
+</head>
+<body>
+
+    <!-- ШАПКА -->
+    <header></header>
+
+    <main class="add-item-page">
+        <div class="container">
+            <div class="form-container">
+                <h1 class="form-title">Поделиться воспоминанием</h1>
+                <p class="form-subtitle">Расскажите историю предмета, который хранит частичку вашего прошлого</p>
+
+                <!-- ФОРМА -->
+                <form id="addMemoryForm" class="add-item-form">
+
+                    <!-- ФОТОГРАФИИ -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Фотографии
+                            <span class="label-hint">Добавьте от 1 до 12 снимков. Хорошее освещение приветствуется</span>
+                        </label>
+                        <div class="photo-upload-area">
+                            <input type="file" id="photoInput" name="Photos" multiple accept="image/*" style="display: none;">
+
+                            <div class="upload-placeholder" id="dropZone" onclick="document.getElementById('photoInput').click()" style="cursor: pointer;">
+                                <div class="upload-icon">🖼️</div>
+                                <p>Перетащите фото сюда или <span class="upload-link">выберите файлы</span></p>
+                                <span class="upload-hint">Поддерживаются JPG, PNG, WEBP (до 10 МБ каждый)</span>
+                            </div>
+
+                            <div class="photo-preview-grid" id="previewContainer"></div>
+                        </div>
+                        <div class="photo-counter" id="photoCounter">Выбрано 0 из 12 фотографий</div>
+                    </div>
+
+                    <!-- НАЗВАНИЕ -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Название воспоминания
+                            <span class="label-hint">Кратко, но ёмко — 1–6 слов</span>
+                        </label>
+                        <input type="text" name="Title" class="form-input" placeholder="Например: «Бабушкин телефон»" required>
+                    </div>
+
+                    <!-- ИСТОРИЯ -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            История предмета
+                            <span class="label-hint">Расскажите, откуда эта вещь, почему она важна для вас</span>
+                        </label>
+                        <textarea name="Story" class="form-textarea" rows="5" placeholder="Я нашёл этот телефон на чердаке бабушкиного дома..." required></textarea>
+                        <div class="field-hint">Чем больше деталей, тем ценнее воспоминание для других</div>
+                    </div>
+
+                    <!-- ТЕГИ (перспектива для масштабирования)
+                    <div class="form-group">
+                        <label class="form-label">
+                            Теги
+                            <span class="label-hint">Выберите или добавьте свои — помогут другим найти вашу историю</span>
+                        </label>
+                        <div class="tags-search-container">
+                            <div class="tags-input-wrapper">
+                                <div class="selected-tags">
+                                    <span class="selected-tag">семейная реликвия <button class="remove-tag" type="button">✖</button></span>
+                                    <span class="selected-tag">винтаж <button class="remove-tag" type="button">✖</button></span>
+                                    <span class="selected-tag">1970-е <button class="remove-tag" type="button">✖</button></span>
+                                </div>
+                                <input type="text" class="tags-search-input" placeholder="Поиск или добавление тега...">
+                            </div>
+                            <div class="tags-suggestions">
+                                <div class="suggestions-list">
+                                    <div class="suggestion-item">семейная реликвия</div>
+                                    <div class="suggestion-item">винтаж</div>
+                                    <div class="suggestion-item">детство</div>
+                                    <div class="suggestion-item">подарок</div>
+                                    <div class="suggestion-item">антиквариат</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-hint">Начните вводить — появятся популярные теги</div>
+                    </div> -->
+
+                    <!-- ГОД -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Год предмета
+                            <span class="label-hint">Если помните точный год или десятилетие</span>
+                        </label>
+                        <input name="YearLabel" type="text" class="form-input" placeholder="1971">
+                        <div class="field-hint">Можно указать примерный период — это помогает создать контекст</div>
+                    </div>
+
+                    <!-- КАТЕГОРИИ -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Категория
+                            <span class="label-hint">К какому типу относится ваш предмет?</span>
+                        </label>
+                        <input type="hidden" name="CategoryId" id="selectedCategoryId" value="">
+                        <div class="category-select">
+                            <button type="button" class="category-btn">🧸 Игрушки</button>
+                            <button type="button" class="category-btn">🪑 Мебель</button>
+                            <button type="button" class="category-btn">🪡 Рукоделие</button>
+                            <button type="button" class="category-btn">👗 Одежда</button>
+                            <button type="button" class="category-btn">💍 Аксессуары</button>
+                            <button type="button" class="category-btn">📰 Печать</button>
+                            <button type="button" class="category-btn">📻 Техника</button>
+                            <button type="button" class="category-btn">🌿 Природа</button>
+                            <button type="button" class="category-btn">📦 Другое</button>
+                        </div>
+                        <div class="field-hint">Выберите категорию — это поможет другим находить похожие воспоминания</div>
+                    </div>
+
+                    <!-- КНОПКИ -->
+                    <div class="form-actions">
+                        <a href="catalog.html" class="btn-cancel" style="text-decoration: none; text-align: center; display: inline-block; line-height: normal;">Отмена</a>
+                        <button type="submit" class="btn-submit">Опубликовать воспоминание</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- ПОДВАЛ -->
+    <footer></footer>
+
+    <script src="assets/js/header.js"></script>
+    <script src="assets/js/footer.js"></script>
+
+    <script>
+        renderHeader();
+        renderFooter();
+    </script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/translate.js"></script>
+
+    <!-- превью фотографий -->
+    <script>
+        const photoInput = document.getElementById('photoInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const photoCounter = document.getElementById('photoCounter');
+        const dropZone = document.getElementById('dropZone');
+
+        photoInput.addEventListener('change', function() {
+            previewContainer.innerHTML = '';
+            const files = this.files;
+
+            if (files.length > 12) {
+                alert('Можно загрузить не более 12 фотографий.');
+                this.value = '';
+                photoCounter.textContent = 'Выбрано 0 из 12 фотографий';
+                dropZone.style.display = 'block';
+                return;
+            }
+
+            photoCounter.textContent = `Выбрано ${files.length} из 12 фотографий`;
+
+            if (files.length > 0) {
+                dropZone.style.display = 'none';
+            } else {
+                dropZone.style.display = 'block';
+            }
+
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'photo-preview';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-photo';
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '✖';
+                    removeBtn.onclick = function () {
+                        previewDiv.remove();
+
+                        const remainingPhotos = previewContainer.querySelectorAll('.photo-preview:not(.add-more)').length;
+
+                        if (remainingPhotos === 0) {
+                            dropZone.style.display = 'block';
+                            photoCounter.textContent = 'Выбрано 0 из 12 фотографий';
+
+                            const existingAddBtn = previewContainer.querySelector('.add-more');
+                            if (existingAddBtn) existingAddBtn.remove();
+                        }
+                    };
+
+                    previewDiv.appendChild(img);
+                    previewDiv.appendChild(removeBtn);
+
+                    const addBtn = previewContainer.querySelector('.add-more');
+                    if (addBtn) {
+                        previewContainer.insertBefore(previewDiv, addBtn);
+                    } else {
+                        previewContainer.appendChild(previewDiv);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            const addMoreBtn = document.createElement('div');
+            addMoreBtn.className = 'photo-preview add-more';
+            addMoreBtn.innerHTML = '<div class="add-more-icon">+</div><span>Добавить</span>';
+            addMoreBtn.onclick = () => document.getElementById('photoInput').click();
+
+            const existingAddBtn = previewContainer.querySelector('.add-more');
+            if (existingAddBtn) existingAddBtn.remove();
+
+            previewContainer.appendChild(addMoreBtn);
+        });
+    </script>
+
+    <!-- отправка данных из формы -->
+    <script>
+        document.getElementById('addMemoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch('/api/memories', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Воспоминание успешно добавлено!');
+                    window.location.href = 'answer.html';
+                } else if (response.status === 401) {
+                    alert('Вы не авторизованы! Нажмите на иконку профиля в шапке, чтобы войти.');
+                } else {
+                    const errorText = await response.text();
+                    console.error("Ошибка сервера:", errorText);
+                    alert('Ошибка при добавлении. Проверьте, запущен ли сервер и заполнены ли поля.');
+                }
+            } catch (err) {
+                console.error("Ошибка сети:", err);
+                alert('Ошибка сети. Проверьте, запущен ли сервер.');
+            }
+        });
+    </script>
+
+    <!-- выбор категории -->
+    <script>
+        document.querySelectorAll('.category-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const categoryId = index + 1;
+                document.getElementById('selectedCategoryId').value = categoryId;
+            });
+        });
+    </script>
+
+    <!-- проверка авторизации -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/api/auth/me');
+            
+                if (!response.ok) {
+                
+                    // модальное окно
+                    const modal = document.getElementById('authModal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                    } else {
+                        alert('Для добавления воспоминания необходимо войти в систему.');
+                    }
+
+                    // блокировка страницы
+                    const mainContent = document.querySelector('main');
+                    if (mainContent) {
+                        mainContent.style.pointerEvents = 'none'; // запрет кликов
+                        mainContent.style.opacity = '0.5';
+                    }
+                }
+            } catch (error) {
+                console.error("Ошибка проверки авторизации:", error);
+            }
+        });
+    </script>
+</body>
+</html>

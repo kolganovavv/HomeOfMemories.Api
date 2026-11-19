@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой дом</title>
+    <link rel="stylesheet" href="../assets/style/style.css">
+</head>
+<body>
+
+    <!-- ШАПКА -->
+    <header></header>
+
+    <main class="my-home-page">
+
+        <div class="container">
+            <div class="my-home-grid">
+
+                <!-- ЛИЧНАЯ ИНФОРМАЦИЯ -->
+                <aside class="profile-sidebar">
+                    <div class="profile-avatar-large">
+                        <img src="../assets/image/icon/interact/no-pfp.svg" alt="Аватар пользователя">
+                        <button class="edit-avatar-btn" aria-label="Редактировать аватар">✎</button>
+                    </div>
+                    <div class="profile-info-edit">
+                        <div class="info-row">
+                            <span class="info-label">Имя</span>
+                            <span class="info-value" id="profileName">Введите имя</span>
+                            <button class="edit-field-btn">✎</button>
+                        </div>
+                        <div class="info-row bio-row">
+                            <span class="info-label">О себе</span>
+                            <p class="info-value bio-text">Напишете описание</p>
+                            <button class="edit-field-btn">✎</button>
+                        </div>
+                    </div>
+                    <button class="save-profile-btn">Сохранить изменения</button>
+                    <button id="logoutBtn" class="btn btn-cancel btn-logout">Выйти из аккаунта</button>
+                </aside>
+
+                <div class="main-content">
+
+                    <!-- ФИЛЬТР -->
+                    <div class="filter-section">
+                        <h3 class="filter-title">Оценки (фильтр по эмоциям)</h3>
+                        <div class="emotion-filters">
+                            <button class="emotion-filter-btn active">Все</button>
+                            <button class="emotion-filter-btn">❤️ Тёплые</button>
+                            <button class="emotion-filter-btn">😢 Ностальгия</button>
+                            <button class="emotion-filter-btn">😊 Радость</button>
+                            <button class="emotion-filter-btn">🤔 Удивление</button>
+                            <button class="emotion-filter-btn">📜 История</button>
+                        </div>
+                    </div>
+
+                    <!-- ИЗБРАННЫЕ ВОСПОМИНАНИЯ -->
+                    <div class="favorites-section">
+                        <h3 class="favorites-title">⭐ Избранные воспоминания</h3>
+                        <div class="favorites-grid">
+                            <a href="item.html" class="favorite-card">
+                                <div class="favorite-image" style="--bg: url('../image/picture/phone.jpg')"></div>
+                                <div class="favorite-info">
+                                    <h4 class="favorite-name">Старинный телефон Моей Бабушки</h4>
+                                    <p class="favorite-author">Dสℝyส</p>
+                                </div>
+                                <button class="remove-favorite" aria-label="Удалить из избранного">✖</button>
+                            </a>
+                            <a href="item.html" class="favorite-card">
+                                <div class="favorite-image" style="--bg: url('../image/picture/comod.jpg')"></div>
+                                <div class="favorite-info">
+                                    <h4 class="favorite-name">Антикварный комод</h4>
+                                    <p class="favorite-author">Денис</p>
+                                </div>
+                                <button class="remove-favorite" aria-label="Удалить из избранного">✖</button>
+                            </a>
+                            <a href="item.html" class="favorite-card">
+                                <div class="favorite-image" style="--bg: url('../image/picture/fan.jpg')"></div>
+                                <div class="favorite-info">
+                                    <h4 class="favorite-name">1971 KDK 30BKU 12</h4>
+                                    <p class="favorite-author">SSdMTCFLTVMhISE=</p>
+                                </div>
+                                <button class="remove-favorite" aria-label="Удалить из избранного">✖</button>
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <!-- ПОЛКИ ВОСПОМИНАНИЙ -->
+                    <div class="shelves-section" style="margin-top: 40px;">
+                        <h2 class="shelves-title">Полки воспоминаний</h2>
+
+                        <div id="myMemoriesContainer" class="shelf-items" style="background-color: var(--secondary);">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ПОДВАЛ -->
+    <footer></footer>
+
+    <script src="assets/js/header.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <script>
+        renderHeader();
+        renderFooter();
+    </script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/translate.js"></script>
+
+    <!-- отображение карточек из бд -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                // проверка авторизации
+                const meRes = await fetch('/api/auth/me');
+                if (!meRes.ok) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const me = await meRes.json();
+                document.getElementById('profileName').textContent = me.login;
+
+                // получение данных
+                const res = await fetch('/api/memories/my');
+                const memories = await res.json();
+
+                const container = document.getElementById('myMemoriesContainer');
+
+                // пусто => заглушка
+                if (memories.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="width: 100%; text-align: center; padding: 40px 20px;">
+                            <div class="empty-icon" style="font-size: 50px; margin-bottom: 20px;">📭</div>
+                            <h2 class="empty-title">У вас пока нет воспоминаний</h2>
+                            <p class="empty-desc" style="margin-bottom: 20px;">Поделитесь своей историей — добавьте первое воспоминание прямо сейчас!</p>
+                            <a href="add-item.html"><button class="btn btn-dark add-memory-btn">➕ Добавить воспоминание</button></a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // вывод карточек
+                container.innerHTML = memories.map(m => {
+                    const imgUrl = m.cover ? `/${m.cover}` : 'assets/image/picture/phone.jpg';
+
+                    // дата
+                    const date = new Date(m.createdAt);
+                    const dateString = `Опубликовано: ${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+                    return `
+                        <a href="item.html?id=${m.id}" class="shelf-item">
+                            <div class="shelf-item-image" style="--bg: url('${imgUrl}')"></div>
+                            <div class="shelf-item-content">
+                                <h4 class="shelf-item-title">${m.title}</h4>
+                                <p class="shelf-item-desc marg">${dateString}</p>
+                                <p class="shelf-item-desc">${m.story}</p>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error("Ошибка загрузки профиля:", error);
+            }
+        });
+    </script>
+
+    <!-- выход из аккаунта -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    // подтверждение
+                    if (!confirm('Вы уверены, что хотите выйти?')) return;
+
+                    try {
+                        // удаление куки
+                        const response = await fetch('/api/auth/logout', {
+                            method: 'POST'
+                        });
+
+                        if (response.ok) {
+                            // успех => переход на главную
+                            window.location.href = 'index.html';
+                        } else {
+                            alert('Ошибка при выходе. Попробуйте еще раз.');
+                        }
+                    } catch (error) {
+                        console.error("Ошибка сети:", error);
+                        alert('Не удалось связаться с сервером.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

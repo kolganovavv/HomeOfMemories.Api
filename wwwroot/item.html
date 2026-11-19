@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Воспоминание | Home of Memories</title>
+    <link rel="stylesheet" href="assets/style/style.css">
+</head>
+<body>
+
+    <header></header>
+
+    <main class="item-page">
+        <!-- БАННЕР -->
+        <div class="item-banner-full">
+            <h1 class="banner-title" id="memoryTitle">Загрузка...</h1>
+        </div>
+
+        <div class="container">
+            <!-- КАТЕГОРИИ -->
+            <div class="item-categories" id="memoryCategories">
+                <span class="item-cat-tag">Загрузка...</span>
+            </div>
+
+            <div class="item-grid">
+                <!-- СЛАЙДЕР -->
+                <div class="slider-section">
+                    <button class="slider-label prev-label" id="prevSlideBtn">❮</button>
+
+                    <div class="slider-container">
+                        <div class="slides-wrapper" id="slidesWrapper">
+                        </div>
+                    </div>
+
+                    <button class="slider-label next-label" id="nextSlideBtn">❯</button>
+
+                    <div class="slider-dots" id="sliderDots">
+                    </div>
+                </div>
+
+                <!-- ИНФОРМАЦИЯ О ВОСПОМИНАНИИ -->
+                <div class="info-section">
+                    <div class="item-author-info">
+                        <a href="#" class="author-avatar" id="authorAvatarLink">
+                            <img src="assets/image/icon/interact/no-pfp.svg" alt="Автор" id="authorAvatar">
+                        </a>
+                        <div class="author-details">
+                            <span class="author-name"><a href="#" id="authorName">Загрузка...</a></span>
+                            <span class="publish-date" id="publishDate">Загрузка...</span>
+                        </div>
+                    </div>
+
+                    <p class="item-story" id="memoryStory">
+                        Загрузка истории...
+                    </p>
+
+                    <div class="ratings-section">
+                        <h3 class="ratings-title">Оцените воспоминание:</h3>
+                        <div class="emotion-buttons">
+                            <button class="emotion-btn">❤️ Тёплые (0)</button>
+                            <button class="emotion-btn">😭 Печаль (0)</button>
+                            <button class="emotion-btn">✍️ Интересно (0)</button>
+                        </div>
+                    </div>
+
+                    <div class="favorite-section">
+                        <button class="favorite-btn">⭐ Добавить в избранное</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ПОДВАЛ -->
+    <footer></footer>
+
+    <script src="assets/js/header.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <script>
+        renderHeader();
+        renderFooter();
+    </script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/translate.js"></script>
+
+    <!-- загрузка данных -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // получение айди из адресной строки
+            const urlParams = new URLSearchParams(window.location.search);
+            const memoryId = urlParams.get('id');
+
+            if (!memoryId) {
+                alert("Воспоминание не выбрано!");
+                window.location.href = 'catalog.html';
+                return;
+            }
+
+            try {
+                // получение данных с сервера
+                const response = await fetch(`/api/memories/${memoryId}`);
+                if (!response.ok) throw new Error('Не найдено');
+
+                const memory = await response.json();
+
+                // заполнение текстовых данных
+                document.getElementById('memoryTitle').textContent = memory.title;
+                document.getElementById('memoryStory').textContent = memory.story;
+                // Вставка имени, создание ссылки на профиль
+                const authorLink = document.getElementById('authorName');
+                authorLink.textContent = memory.author;
+                if (memory.authorId) {
+                    authorLink.href = `user-home.html?id=${memory.authorId}`;
+
+                    // ссылка для аватарки
+                    const avatarLink = document.getElementById('authorAvatarLink');
+                    if (avatarLink) {
+                        avatarLink.href = `user-home.html?id=${memory.authorId}`;
+                    }
+                }
+
+                // вывод даты
+                const date = new Date(memory.createdAt);
+                document.getElementById('publishDate').textContent = `Опубликовано: ${date.toLocaleDateString('ru-RU')}`;
+
+                // категории
+                document.getElementById('memoryCategories').innerHTML = `
+                    <span class="item-cat-tag">${memory.category || 'Без категории'}</span>
+                    ${memory.yearLabel ? `<span class="item-cat-tag">${memory.yearLabel}</span>` : ''}
+                `;
+
+                // слайдер
+                const photos = memory.photos || [];
+                initSlider(photos);
+
+            } catch (error) {
+                console.error("Ошибка:", error);
+                document.getElementById('memoryStory').textContent = "Не удалось загрузить воспоминание.";
+            }
+        });
+
+        let currentSlide = 0;
+        let totalSlides = 0;
+        let slidesWrapper, sliderDots;
+
+        function initSlider(photos) {
+            slidesWrapper = document.getElementById('slidesWrapper');
+            sliderDots = document.getElementById('sliderDots');
+
+            if (!photos || photos.length === 0) {
+                slidesWrapper.innerHTML = `<div class="slide"><img src="assets/image/picture/phone.jpg" alt="Нет фото"></div>`;
+                return;
+            }
+
+            totalSlides = photos.length;
+
+            slidesWrapper.innerHTML = photos.map(path => `
+                <div class="slide">
+                    <img src="/${path}" alt="Фото">
+                </div>
+            `).join('');
+
+            if (totalSlides > 1) {
+                sliderDots.innerHTML = photos.map((_, index) => `
+                    <div class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></div>
+                `).join('');
+            } else {
+                sliderDots.innerHTML = '';
+            }
+
+            slidesWrapper.style.width = `${totalSlides * 100}%`;
+
+            const slides = slidesWrapper.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.style.width = `${100 / totalSlides}%`;
+            });
+
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const offset = -(100 / totalSlides) * currentSlide;
+            slidesWrapper.style.transform = `translateX(${offset}%)`;
+
+            const dots = sliderDots.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        document.getElementById('prevSlideBtn').addEventListener('click', () => {
+            if (totalSlides <= 1) return;
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        });
+
+        document.getElementById('nextSlideBtn').addEventListener('click', () => {
+            if (totalSlides <= 1) return;
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlider();
+        });
+    </script>
+</body>
+</html>
